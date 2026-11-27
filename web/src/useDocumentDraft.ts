@@ -8,7 +8,6 @@ export function useDocumentDraft(record: DocumentRecord, onCommitted: (record: D
   const [data, setData] = useState(record.data);
   const [status, setStatus] = useState<SaveStatus>('saved');
   const [message, setMessage] = useState('');
-  const [resetToken, setResetToken] = useState(0);
   const draft = useRef({ title: record.title, data: record.data });
   const revision = useRef(record.revision);
   const edit = useRef(0), saved = useRef(0), blocked = useRef(false);
@@ -72,7 +71,7 @@ export function useDocumentDraft(record: DocumentRecord, onCommitted: (record: D
     draft.current = { title: latest.title, data: latest.data };
     revision.current = latest.revision;
     edit.current = 0; saved.current = 0; blocked.current = false; pendingCommit.current = null;
-    setTitle(latest.title); setData(latest.data); setResetToken(value => value + 1);
+    setTitle(latest.title); setData(latest.data);
     committed.current(latest); updateStatus('saved');
   };
   const saveCopy = async () => {
@@ -88,5 +87,5 @@ export function useDocumentDraft(record: DocumentRecord, onCommitted: (record: D
     document.addEventListener('visibilitychange', visibility);
     return () => { mounted.current = false; clearTimeout(timer.current); window.removeEventListener('beforeunload', beforeUnload); document.removeEventListener('visibilitychange', visibility); };
   }, [flush]);
-  return { title, data, status, message, resetToken, change, flush, retry, reload, saveCopy };
+  return { title, data, status, message, change, flush, retry, reload, saveCopy };
 }

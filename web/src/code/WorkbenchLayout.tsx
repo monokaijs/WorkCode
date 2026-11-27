@@ -26,10 +26,10 @@ const wasm = await initialize({ layout: {
   end() { stack.pop(); },
   region(ptr: number, length: number) { stack.at(-1)!.children.push(decode(ptr, length)); },
 } });
-const { memory, render_project, render_library } = wasm.exports as {
+const { memory, render_project, render_file } = wasm.exports as {
   memory: WebAssembly.Memory;
+  render_file(): void;
   render_project(tree: boolean, tools: boolean, panel: boolean, terminal: boolean): void;
-  render_library(): void;
 };
 const cache = new Map<string, Layout>();
 function layout(key: string, build: () => void) {
@@ -61,6 +61,6 @@ export function WorkbenchLayout({ tree, tools, panel, terminal, commands, style,
 }) {
   return render(layout(`project:${tree}:${tools}:${panel}:${terminal}`, () => render_project(tree, tools, panel, terminal)), regions, commands, style);
 }
-export function LibraryLayout(regions: Record<'language' | 'source' | 'status', ReactNode>) {
-  return render(layout('library', render_library), regions, {});
+export function SingleFileLayout({ project, ...regions }: Record<'tab' | 'actions' | 'alerts' | 'source' | 'status' | 'children', ReactNode> & { project: Binding }) {
+  return render(layout('file', render_file), regions, { project });
 }

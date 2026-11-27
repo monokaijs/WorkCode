@@ -101,10 +101,18 @@ pub extern "C" fn render_project(tree: bool, tools: bool, panel: bool, terminal:
 }
 
 #[no_mangle]
-pub extern "C" fn render_library() {
-    group("div", "code-editor-wrap", || {
-        slot("language");
-        slot("source");
-        slot("status");
+pub extern "C" fn render_file() {
+    group("div", "code-work-area", || {
+        group("section", "code-editor-area island", || {
+            group("header", "code-file-bar", || {
+                button("project", "Projects", "code-icon");
+                slot("tab");
+                slot("actions");
+            });
+            slot("alerts");
+            slot("source");
+        });
     });
+    slot("status");
+    slot("children");
 }

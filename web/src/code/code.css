@@ -239,7 +239,11 @@
 .code-buffer-area, .code-buffer, .code-editor-surface { display: flex; flex: 1; min-height: 0; min-width: 0; }
 .code-buffer[hidden] { display: none; }
 .code-editor-surface .cm-editor { background: var(--code-island); flex: 1; min-height: 0; min-width: 0; }
-.code-editor-surface .cm-scroller { font-size: 13.5px; line-height: 1.7; }
+/* The scroller is the only thing a vertical drag moves. At either end it stops
+   instead of handing the drag on, so the header and status bar stay put. */
+.code-editor-surface .cm-scroller {
+  font-size: 13.5px; line-height: 1.7; min-height: 0; overflow: auto; overscroll-behavior: contain;
+}
 .code-editor-surface .cm-content { padding-block: 6px 40px; }
 .code-editor-surface .cm-gutters { background: var(--code-island); border: 0; padding-inline: 10px 4px; }
 .code-editor-surface .cm-lineNumbers .cm-gutterElement { opacity: .7; }
@@ -362,30 +366,44 @@
 .code-recent small { color: var(--code-muted); display: block; }
 .code-recent svg { color: var(--code-muted); flex: none; }
 
-.code-app-slot { display: flex; flex: 1; min-height: 0; }
-.workspace-shell:has(.code-app-slot) .main-workspace { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.code-app-slot { display: flex; flex: 1; min-height: 0; overflow: hidden; overscroll-behavior: none; }
+.workspace-shell:has(.code-app-slot) .main-workspace { display: flex; flex-direction: column; min-height: 0; overflow: hidden; overscroll-behavior: none; }
 .workspace-shell:has(.code-app-slot) { height: 100dvh; min-height: 0; }
+/* While Code is open the page itself never scrolls or rubber-bands, embedded,
+   standalone or in a desktop window; only the code and Code's lists do. */
+html:has(.code-app-slot), html:has(.code-app-slot) body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+.code-app { overscroll-behavior: none; }
+.code-app .code-tabs { overscroll-behavior: contain; }
 
 .code-terminal { background: var(--code-island); flex: 1; min-height: 0; padding: 2px 10px 6px 14px; }
 .code-terminal .xterm { height: 100%; }
 
-/* A library file opened by itself. */
-.code-file .code-editor-wrap { flex: 1; min-height: 0; }
-.code-file .code-toolbar { gap: 8px; }
-.code-file .code-toolbar strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.code-file .code-toolbar [role='status'] { color: var(--code-muted); font-size: 12px; }
-
-.code-file .code-file-title {
-  flex: 1; min-width: 0; background: transparent; border: 0; color: var(--code-text);
-  font-size: 16px; font-weight: 600; padding: 5px 2px; text-overflow: ellipsis;
+/* A single tab shares its row with the file controls. */
+.code-file .code-work-area { padding-top: var(--code-gap); }
+.code-file-bar { align-items: center; display: flex; flex: none; gap: 4px; min-height: 44px; padding-inline: 2px; }
+.code-file-bar .code-file-actions { margin-inline-start: auto; }
+.code-file .code-file-bar .code-icon { flex: none; height: 44px; width: 44px; }
+.code-file-actions { align-items: center; display: flex; flex: none; gap: 4px; }
+.code-file-bar :is(.code-primary, .code-secondary) { height: 30px; padding-block: 0; white-space: nowrap; }
+.code-file .code-editor-surface { overflow: hidden; }
+.code-file .code-tab { flex: 0 1 auto; max-width: 420px; min-width: 0; padding-right: 0; }
+.code-file .code-tab.dirty:hover .code-dirty { display: inline-block; }
+.code-tab-label { align-items: center; display: flex; gap: 7px; height: 100%; min-width: 0; padding: 0 10px; }
+.code-tab-label > span:not(.code-file-mark) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.code-app .code-tab-title {
+  background: transparent; border: 0; border-radius: 4px; color: var(--code-text); field-sizing: content; margin-inline: -3px;
+  max-width: 100%; min-width: 4ch; padding: 2px 3px; text-overflow: ellipsis;
 }
-.code-file .code-toolbar .code-icon { width: 44px; height: 44px; }
-.code-file .code-editor-surface { background: var(--code-island); overflow: hidden; }
-.code-file .cm-scroller { overflow: auto; }
-.code-file .code-statusbar { border-top: 1px solid var(--code-border); }
-.code-file .code-statusbar select { color: inherit; background: transparent; border: 0; padding: 4px; }
-.code-file .code-save-state { display: inline-flex; align-items: center; gap: 4px; }
+.code-app .code-tab-title:hover { background: var(--code-hover-bg); }
+.code-app .code-tab-title:focus-visible { background: var(--code-island); outline-offset: 0; }
+.code-file .code-save-state { align-items: center; display: inline-flex; gap: 4px; min-width: 0; }
 .code-file .code-conflict { flex-wrap: wrap; }
+.code-app .code-language {
+  appearance: none; background: transparent; border: 0; border-radius: 5px; color: inherit; cursor: pointer; font-size: inherit; height: 22px; padding: 0 6px;
+}
+.code-app .code-language:hover { background: var(--code-hover-bg); color: var(--code-text); }
+/* Touch keyboards zoom into fields smaller than 16px. */
+@media (pointer: coarse) { .code-app .code-tab-title { font-size: 16px; } }
 
 /* Narrow windows float the side islands over the editor. */
 @media (max-width: 1023px) {

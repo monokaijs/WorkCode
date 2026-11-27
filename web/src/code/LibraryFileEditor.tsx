@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
-import { ArrowDownToLine, ArrowLeft, Check, FolderInput } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { AlertCircle, ArrowDownToLine, Check, FolderInput, LoaderCircle } from 'lucide-react';
 import type { DocumentRecord } from '../../../packages/sdk';
-import CodeEditor from '../components/CodeEditor';
 import { useDocumentDraft } from '../useDocumentDraft';
 import { errorMessage, store, type CodeData } from '../workspace';
 import { useDirtyState } from './appContext';
 import type { LibraryCopy } from './CodeWorkbench';
-import './code.css';
+import FileWorkspace, { editorLanguage } from './FileWorkspace';
 
 interface Props {
   record: DocumentRecord;
@@ -20,9 +19,14 @@ interface Props {
   close(): void;
 }
 
+/** A library file in the Code workbench. Edits save themselves, as drafts. */
 export default function LibraryFileEditor({ record, registerGuard, onCommitted, onCopy, onExport, onSaveToProject, ask, notify, close }: Props) {
   const draft = useDocumentDraft(record, onCommitted);
   const [resolving, setResolving] = useState(false);
+  const data = draft.data as CodeData;
+  // Keystrokes can arrive before React renders the previous one.
+  const latest = useRef(data);
+  latest.current = data;
   useDirtyState(draft.status !== 'saved');
   useEffect(() => registerGuard(draft.flush), [registerGuard, draft.flush]);
 
@@ -50,24 +54,29 @@ export default function LibraryFileEditor({ record, registerGuard, onCommitted, 
     saved: store.durability === 'browser-local' ? 'Saved in this browser' : 'Saved on device',
     saving: 'Saving…', dirty: 'Unsaved changes', conflict: 'Another version exists', error: 'Save needs attention',
   }[draft.status];
+  const blocked = draft.status === 'conflict' || draft.status === 'error';
+  const change = (next: Partial<CodeData>) => {
+    latest.current = { ...latest.current, ...next };
+    draft.change({ data: latest.current });
+  };
 
-  return <section className="code-app code-file" aria-label="Code file editor" inert={resolving} aria-busy={resolving}>
-    <header className="code-toolbar">
-      <button className="code-icon" title="Projects" aria-label="Projects" onClick={close}><ArrowLeft size={18} /></button>
-      <input className="code-file-title" aria-label="Document title" data-testid="document-title" maxLength={240}
-        value={draft.title} placeholder="Untitled" onChange={event => draft.change({ title: event.target.value })} />
-      <button className="code-icon" title="Save to Project" aria-label="Save to Project" onClick={() => void share('project')}><FolderInput size={18} /></button>
-      <button className="code-icon" title="Export document" aria-label="Export document" onClick={() => void share('export')}><ArrowDownToLine size={18} /></button>
-    </header>
-    {(draft.status === 'conflict' || draft.status === 'error') && <div className="code-conflict" role="alert">
-      <span>{draft.message}</span>
-      <button onClick={() => void resolve('copy')}>Save as copy</button>
-      <button onClick={() => void resolve('reload')}>Reload saved version</button>
-      {draft.status === 'error' && <button onClick={() => void resolve('retry')}>Retry save</button>}
+  return <FileWorkspace label="Code file editor" name={draft.title.trim() || 'Untitled'} busy={resolving}
+    text={data.text} language={editorLanguage(data.language)} dirty={draft.status !== 'saved'}
+    onChange={text => change({ text })} onLanguage={language => change({ language })} close={close}
+    title={<input className="code-tab-title" aria-label="Document title" data-testid="document-title" maxLength={240}
+      size={Math.max(8, draft.title.length + 1)} spellCheck={false} autoCapitalize="off" autoCorrect="off"
+      value={draft.title} placeholder="Untitled" onChange={event => draft.change({ title: event.target.value })} />}
+    actions={<>
+      <button type="button" className="code-icon" title="Save to Project" aria-label="Save to Project" onClick={() => void share('project')}><FolderInput size={16} /></button>
+      <button type="button" className="code-icon" title="Export document" aria-label="Export document" onClick={() => void share('export')}><ArrowDownToLine size={16} /></button>
+    </>}
+    alerts={blocked && <div className="code-conflict" role="alert">
+      <AlertCircle size={14} /><span>{draft.message}</span>
+      <button type="button" disabled={resolving} onClick={() => void resolve('copy')}>Save as copy</button>
+      <button type="button" disabled={resolving} onClick={() => void resolve('reload')}>Reload saved version</button>
+      {draft.status === 'error' && <button type="button" disabled={resolving} onClick={() => void resolve('retry')}>Retry save</button>}
     </div>}
-    <CodeEditor data={draft.data as CodeData} resetToken={draft.resetToken} onChange={data => draft.change({ data })}
-      status={<span className="code-save-state" role="status" data-testid="save-status">
-        {draft.status === 'saved' && <Check size={14} />}{status}
-      </span>} />
-  </section>;
+    status={<span className={`code-save-state ${blocked ? 'warn' : ''}`} role="status" data-testid="save-status">
+      {draft.status === 'saved' ? <Check size={12} /> : draft.status === 'saving' ? <LoaderCircle size={12} className="spin" /> : null}{status}
+    </span>} />;
 }
