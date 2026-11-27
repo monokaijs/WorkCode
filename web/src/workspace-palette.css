@@ -1,0 +1,48 @@
+/* Web defaults. WorkOS supplies the same roles from UIKit in a hosted app. */
+:root {
+  --workspace-canvas: var(--paper);
+  --workspace-panel: #f8faf5;
+  --workspace-chrome: #fafbf7;
+  --workspace-recessed: #f5f5f0;
+  --workspace-text: var(--ink);
+  --workspace-secondary-text: #526158;
+  --workspace-divider: var(--line);
+  --workspace-accent: var(--green);
+  --workspace-on-accent: var(--paper);
+  --workspace-blue: #245b97;
+  --workspace-purple: #6b4a9c;
+  --workspace-green: var(--green-dark);
+  --workspace-warning: #8b5818;
+  --workspace-danger: #aa473d;
+}
+
+:root[data-workspace-appearance] {
+  background: var(--workspace-recessed);
+  color: var(--workspace-text);
+  color-scheme: var(--workspace-color-scheme);
+}
+
+/* Library documents still use the Workspace document layout inside Code. */
+:root[data-workspace-appearance] :is(.editor-layout, .document-topline, .collection-footer, .editor-footer) {
+  border-color: var(--workspace-divider);
+}
+:root[data-workspace-appearance] :is(.collection-label, .document-preview, .document-list-date, .collection-footer, .document-meta, .document-breadcrumb, .editor-footer) {
+  color: var(--workspace-secondary-text);
+}
+:root[data-workspace-appearance] :is(.document-heading input, .document-list-title strong, .code-language-bar select) {
+  color: var(--workspace-text);
+}
+:root[data-workspace-appearance] :is(.search-field, .button.secondary, .code-language-bar select) {
+  background: var(--workspace-canvas);
+  border-color: var(--workspace-divider);
+  color: var(--workspace-text);
+}
+:root[data-workspace-appearance] :is(.code-language-bar, .document-list-card:hover, .button.secondary:hover:not(:disabled)) {
+  background: var(--workspace-chrome);
+  border-color: var(--workspace-divider);
+  color: var(--workspace-secondary-text);
+}
+:root[data-workspace-appearance] .document-list-card.selected {
+  background: color-mix(in srgb, var(--workspace-accent) 17%, var(--workspace-canvas));
+  border-color: var(--workspace-divider);
+}
