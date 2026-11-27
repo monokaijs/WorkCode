@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowUpRight, ChevronRight, Code2, FileCode2, FolderOpen, FolderPlus, Server, X } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, ChevronRight, Code2, FileCode2, FolderOpen, FolderPlus, Server, Upload, X } from 'lucide-react';
 import { errorMessage, store } from '../workspace';
 import CodeDialog from './CodeDialog';
 import ProjectPane from './ProjectPane';
@@ -18,6 +18,7 @@ interface Props {
   library: { id: string; title: string }[];
   openDocument(id: string): void;
   newDocument(): void;
+  importDocument(): void;
   registerGuard(guard: () => Promise<boolean>): () => void;
 }
 const recentKey = 'code.projects.recent';
@@ -223,6 +224,7 @@ export default function CodeWorkbench(props: Props) {
         </section>}
         {showLibrary && <section className="code-recent" aria-label="Library Files"><h2>Library Files</h2>
           <button onClick={props.newDocument}><FileCode2 size={15} /><span>New code file</span></button>
+          <button onClick={props.importDocument}><Upload size={15} /><span>Import file</span></button>
           {props.library.map(item => <button key={item.id} onClick={() => props.openDocument(item.id)}><FileCode2 size={15} /><span>{item.title}</span></button>)}
         </section>}
       </div>

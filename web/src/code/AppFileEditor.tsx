@@ -84,6 +84,6 @@ export default function AppFileEditor({ file, registerGuard, close }: {
         }}>Discard edits</button>
       </div>
     </CodeDialog>}
-    <CodeEditor data={data} resetToken={reset} onChange={setData} fileName={handle.name} />
+    <CodeEditor data={data} resetToken={reset} onChange={setData} />
   </section>;
 }

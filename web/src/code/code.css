@@ -375,6 +375,18 @@
 .code-file .code-toolbar strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .code-file .code-toolbar [role='status'] { color: var(--code-muted); font-size: 12px; }
 
+.code-file .code-file-title {
+  flex: 1; min-width: 0; background: transparent; border: 0; color: var(--code-text);
+  font-size: 16px; font-weight: 600; padding: 5px 2px; text-overflow: ellipsis;
+}
+.code-file .code-toolbar .code-icon { width: 44px; height: 44px; }
+.code-file .code-editor-surface { background: var(--code-island); overflow: hidden; }
+.code-file .cm-scroller { overflow: auto; }
+.code-file .code-statusbar { border-top: 1px solid var(--code-border); }
+.code-file .code-statusbar select { color: inherit; background: transparent; border: 0; padding: 4px; }
+.code-file .code-save-state { display: inline-flex; align-items: center; gap: 4px; }
+.code-file .code-conflict { flex-wrap: wrap; }
+
 /* Narrow windows float the side islands over the editor. */
 @media (max-width: 1023px) {
   .code-tools { box-shadow: -8px 0 24px rgb(0 0 0 / .22); inset: 0 var(--code-gap) 0 auto; position: absolute; width: min(280px, 80%); z-index: 6; }
